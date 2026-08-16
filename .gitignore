@@ -3,3 +3,11 @@ __pycache__/
 *.pyc
 *.egg-info/
 .pytest_cache/
+
+# Data files
+data/raw/*
+data/processed/*
+
+# Keep folder structure
+!data/raw/.gitkeep
+!data/processed/.gitkeep

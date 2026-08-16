@@ -7,7 +7,9 @@ name = "customer-churn-classifier"
 version = "0.1.0"
 description = "A machine-learning project that predicts customer churn using classification models."
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "pandas"
+]
 
 [project.optional-dependencies]
 dev = [
