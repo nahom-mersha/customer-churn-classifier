@@ -23,3 +23,16 @@ def sigmoid(z: np.ndarray) -> np.ndarray:
     result[negative] = exp_z / (1 + exp_z)
 
     return result
+
+
+def binary_cross_entropy(
+    y_true: np.ndarray,
+    p: np.ndarray,
+) -> float:
+    """Compute average binary cross-entropy loss."""
+    eps = 1e-15
+    p = np.clip(p, eps, 1 - eps)
+
+    losses = -(y_true * np.log(p) + (1 - y_true) * np.log(1 - p))
+
+    return float(np.mean(losses))
