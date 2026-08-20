@@ -133,3 +133,4 @@ if __name__ == "__main__":
     print("Final loss:", losses[-1])
     print("Probabilities:", probabilities)
     print("Predictions:", predictions)
+    # DONE
