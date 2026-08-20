@@ -103,3 +103,33 @@ def predict(
     probabilities = predict_proba(X, w, b)
 
     return (probabilities >= threshold).astype(int)
+
+
+if __name__ == "__main__":
+    X = np.array(
+        [
+            [0.0],
+            [1.0],
+            [2.0],
+            [3.0],
+        ]
+    )
+
+    y = np.array([0, 0, 1, 1])
+
+    w, b, losses = train_logistic_regression(
+        X,
+        y,
+        learning_rate=0.1,
+        n_iterations=1000,
+    )
+
+    probabilities = predict_proba(X, w, b)
+    predictions = predict(X, w, b)
+
+    print("Weights:", w)
+    print("Bias:", b)
+    print("First loss:", losses[0])
+    print("Final loss:", losses[-1])
+    print("Probabilities:", probabilities)
+    print("Predictions:", predictions)
