@@ -81,3 +81,25 @@ def train_logistic_regression(
         b = b - learning_rate * db
 
     return w, b, losses
+
+
+def predict_proba(
+    X: np.ndarray,
+    w: np.ndarray,
+    b: float,
+) -> np.ndarray:
+    """Predict churn probabilities."""
+    z = linear_score(X, w, b)
+    return sigmoid(z)
+
+
+def predict(
+    X: np.ndarray,
+    w: np.ndarray,
+    b: float,
+    threshold: float = 0.5,
+) -> np.ndarray:
+    """Predict binary labels using a probability threshold."""
+    probabilities = predict_proba(X, w, b)
+
+    return (probabilities >= threshold).astype(int)
