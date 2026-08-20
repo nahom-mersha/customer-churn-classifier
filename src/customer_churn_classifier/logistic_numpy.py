@@ -51,3 +51,33 @@ def compute_gradients(
     db = float(np.mean(error))
 
     return dw, db
+
+
+def train_logistic_regression(
+    X: np.ndarray,
+    y: np.ndarray,
+    learning_rate: float = 0.1,
+    n_iterations: int = 1000,
+) -> tuple[np.ndarray, float, list[float]]:
+    """Train logistic regression using gradient descent."""
+
+    n_features = X.shape[1]
+
+    w = np.zeros(n_features, dtype=float)
+    b = 0.0
+
+    losses = []
+
+    for _ in range(n_iterations):
+        z = linear_score(X, w, b)
+        p = sigmoid(z)
+
+        loss = binary_cross_entropy(y, p)
+        losses.append(loss)
+
+        dw, db = compute_gradients(X, y, p)
+
+        w = w - learning_rate * dw
+        b = b - learning_rate * db
+
+    return w, b, losses
