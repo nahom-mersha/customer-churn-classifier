@@ -36,3 +36,18 @@ def binary_cross_entropy(
     losses = -(y_true * np.log(p) + (1 - y_true) * np.log(1 - p))
 
     return float(np.mean(losses))
+
+
+def compute_gradients(
+    X: np.ndarray,
+    y: np.ndarray,
+    p: np.ndarray,
+) -> tuple[np.ndarray, float]:
+    """Compute gradients for logistic regression weights and bias."""
+    m = X.shape[0]
+    error = p - y
+
+    dw = (X.T @ error) / m
+    db = float(np.mean(error))
+
+    return dw, db
