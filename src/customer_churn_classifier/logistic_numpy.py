@@ -105,6 +105,67 @@ def predict(
     return (probabilities >= threshold).astype(int)
 
 
+def numerical_weight_gradients(
+    X: np.ndarray,
+    y: np.ndarray,
+    w: np.ndarray,
+    b: float,
+    epsilon: float = 1e-5,
+) -> np.ndarray:
+    """Estimate weight gradients using central finite differences."""
+    numerical_dw = np.zeros_like(w, dtype=float)
+
+    for i in range(len(w)):
+        w_plus = w.copy()
+        w_minus = w.copy()
+
+        w_plus[i] += epsilon
+        w_minus[i] -= epsilon
+
+        # Loss with w_i + epsilon
+        z_plus = linear_score(X, w_plus, b)
+        a_plus = sigmoid(z_plus)
+        loss_plus = binary_cross_entropy(y, a_plus)
+
+        # Loss with w_i - epsilon
+        z_minus = linear_score(X, w_minus, b)
+        a_minus = sigmoid(z_minus)
+        loss_minus = binary_cross_entropy(y, a_minus)
+
+        # slope = rise / run
+        numerical_dw[i] = (loss_plus - loss_minus) / (2 * epsilon)
+
+    return numerical_dw
+
+
+def numerical_bias_gradient(
+    X: np.ndarray,
+    y: np.ndarray,
+    w: np.ndarray,
+    b: float,
+    epsilon: float = 1e-5,
+) -> float:
+    """Estimate the bias gradient using central finite differences."""
+
+    b_plus = b + epsilon
+    b_minus = b - epsilon
+
+    # Loss with b + epsilon
+    z_plus = linear_score(X, w, b_plus)
+    a_plus = sigmoid(z_plus)
+    loss_plus = binary_cross_entropy(y, a_plus)
+
+    # Loss with b - epsilon
+    z_minus = linear_score(X, w, b_minus)
+    a_minus = sigmoid(z_minus)
+    loss_minus = binary_cross_entropy(y, a_minus)
+
+    # slope = rise / run
+    numerical_db = (loss_plus - loss_minus) / (2 * epsilon)
+
+    return float(numerical_db)
+
+
 if __name__ == "__main__":
     X = np.array(
         [
