@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.metrics import (
     confusion_matrix,
     f1_score,
@@ -73,11 +74,24 @@ def main() -> None:
         b,
     )
 
+    # 7. Save test probabilities for later analysis
+    results_df = pd.DataFrame(
+        {
+            "y_true": y_test_array,
+            "churn_probability": probabilities,
+        }
+    )
+
+    results_df.to_csv(
+        "reports/logistic_numpy_test_probabilities.csv",
+        index=False,
+    )
+
     print("Training complete")
     print(f"First training loss: {losses[0]:.4f}")
     print(f"Final training loss: {losses[-1]:.4f}")
 
-    # 7. Evaluate the same probabilities at different thresholds
+    # 8. Evaluate the same probabilities at different thresholds
     for threshold in [0.30, 0.50, 0.70]:
         evaluate_threshold(
             y_test_array,
