@@ -1,4 +1,13 @@
-from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+from sklearn.metrics import (
+    PrecisionRecallDisplay,
+    RocCurveDisplay,
+    average_precision_score,
+    brier_score_loss,
+    roc_auc_score,
+)
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 
 from customer_churn_classifier.data import load_clean_data
@@ -59,6 +68,43 @@ def main() -> None:
         print(f"ROC-AUC: {roc_auc:.4f}")
         print(f"Average Precision: {average_precision:.4f}")
         print(f"Brier score: {brier:.4f}")
+        reports_dir = Path("reports/figures")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    model_probabilities = {
+        "Logistic Regression": logistic_proba,
+        "Gradient Boosting": gradient_boosting_proba,
+    }
+
+    # ROC curve
+    fig, ax = plt.subplots()
+
+    for model_name, probabilities in model_probabilities.items():
+        RocCurveDisplay.from_predictions(
+            y_train,
+            probabilities,
+            name=model_name,
+            ax=ax,
+        )
+
+    ax.set_title("ROC Curve: Logistic Regression vs Gradient Boosting")
+    fig.tight_layout()
+    fig.savefig(reports_dir / "roc_curve.png", dpi=300)
+
+    # Precision-Recall curve
+    fig, ax = plt.subplots()
+
+    for model_name, probabilities in model_probabilities.items():
+        PrecisionRecallDisplay.from_predictions(
+            y_train,
+            probabilities,
+            name=model_name,
+            ax=ax,
+        )
+
+    ax.set_title("Precision-Recall Curve: Logistic Regression vs Gradient Boosting")
+    fig.tight_layout()
+    fig.savefig(reports_dir / "precision_recall_curve.png", dpi=300)
 
 
 if __name__ == "__main__":
