@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from sklearn.calibration import CalibrationDisplay
 from sklearn.metrics import (
     PrecisionRecallDisplay,
     RocCurveDisplay,
@@ -105,6 +106,22 @@ def main() -> None:
     ax.set_title("Precision-Recall Curve: Logistic Regression vs Gradient Boosting")
     fig.tight_layout()
     fig.savefig(reports_dir / "precision_recall_curve.png", dpi=300)
+    # Calibration curve / reliability diagram
+    fig, ax = plt.subplots()
+
+    for model_name, probabilities in model_probabilities.items():
+        CalibrationDisplay.from_predictions(
+            y_train,
+            probabilities,
+            n_bins=10,
+            strategy="quantile",
+            name=model_name,
+            ax=ax,
+        )
+
+    ax.set_title("Calibration Curve: Logistic Regression vs Gradient Boosting")
+    fig.tight_layout()
+    fig.savefig(reports_dir / "calibration_curve.png", dpi=300)
 
 
 if __name__ == "__main__":
