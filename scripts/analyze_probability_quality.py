@@ -123,6 +123,60 @@ def main() -> None:
     fig.tight_layout()
     fig.savefig(reports_dir / "calibration_curve.png", dpi=300)
 
+    threshold = 0.50
+    gradient_boosting_pred = (gradient_boosting_proba >= threshold).astype(int)
+
+    analysis_df = X_train.copy()
+    analysis_df["y_true"] = y_train.to_numpy()
+    analysis_df["churn_probability"] = gradient_boosting_proba
+    analysis_df["y_pred"] = gradient_boosting_pred
+
+    analysis_df["error_type"] = "correct"
+    analysis_df.loc[
+        (analysis_df["y_true"] == 0) & (analysis_df["y_pred"] == 1),
+        "error_type",
+    ] = "false_positive"
+    analysis_df.loc[
+        (analysis_df["y_true"] == 1) & (analysis_df["y_pred"] == 0),
+        "error_type",
+    ] = "false_negative"
+
+    print()
+    print("Error counts at threshold 0.50:")
+    print(analysis_df["error_type"].value_counts())
+
+    print()
+    print("Mean numeric features by error type:")
+    print(
+        analysis_df.groupby("error_type")[
+            ["tenure", "MonthlyCharges", "TotalCharges"]
+        ].mean()
+    )
+
+    print()
+    print("Contract distribution by error type:")
+    print(
+        analysis_df.groupby("error_type")["Contract"]
+        .value_counts(normalize=True)
+        .rename("share")
+    )
+
+    print()
+    print("InternetService distribution by error type:")
+    print(
+        analysis_df.groupby("error_type")["InternetService"]
+        .value_counts(normalize=True)
+        .rename("share")
+    )
+
+    print()
+    print("PaymentMethod distribution by error type:")
+    print(
+        analysis_df.groupby("error_type")["PaymentMethod"]
+        .value_counts(normalize=True)
+        .rename("share")
+    )
+
 
 if __name__ == "__main__":
     main()

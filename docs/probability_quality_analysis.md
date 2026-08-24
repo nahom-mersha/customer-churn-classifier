@@ -129,3 +129,106 @@ Reason:
 Gradient Boosting remains the primary candidate model.
 
 Logistic Regression remains a reference candidate because its performance is close and it is easier to interpret.
+
+## Error analysis at threshold 0.50
+
+After analyzing ranking quality, probability quality, and calibration, the next step was to inspect the model's mistakes.
+
+The error analysis used the Gradient Boosting model because it is the current primary candidate. A temporary classification threshold of `0.50` was used.
+
+This threshold is not the final business threshold. It is only a starting point for understanding the model's false positives and false negatives.
+
+## Error counts
+
+At threshold `0.50`, the Gradient Boosting model produced the following results on the out-of-fold training predictions:
+
+| Error type | Count |
+|---|---:|
+| Correct | 4544 |
+| False negative | 706 |
+| False positive | 384 |
+
+The model made more false negatives than false positives.
+
+For this churn problem:
+
+- a false positive means the model predicted churn, but the customer actually stayed;
+- a false negative means the model predicted no churn, but the customer actually churned.
+
+This is important because false negatives represent missed churners. In a retention use case, these are customers the business may fail to contact before they leave.
+
+## Numeric feature patterns
+
+| Error type | Average tenure | Average MonthlyCharges | Average TotalCharges |
+|---|---:|---:|---:|
+| Correct | 34.87 | 63.19 | 2399.35 |
+| False negative | 28.49 | 68.84 | 2356.55 |
+| False positive | 11.66 | 78.32 | 1060.67 |
+
+False positives had the shortest average tenure and the highest average monthly charges.
+
+This suggests that the model strongly associates short customer tenure and high monthly charges with churn risk. Some customers with these high-risk signals still stayed, so they became false positives.
+
+False negatives had intermediate values. They had shorter tenure and higher monthly charges than the correctly classified group, but they were less extreme than the false positives. This may explain why some actual churners did not cross the `0.50` decision threshold.
+
+## Contract patterns
+
+| Error type | Month-to-month | One year | Two year |
+|---|---:|---:|---:|
+| Correct | 47.99% | 22.95% | 29.05% |
+| False negative | 76.06% | 18.41% | 5.52% |
+| False positive | 100.00% | 0.00% | 0.00% |
+
+All false positives were month-to-month customers.
+
+This makes sense because month-to-month contracts are usually more flexible and are often associated with higher churn risk. The model appears to treat month-to-month contracts as a strong churn signal.
+
+False negatives were also mostly month-to-month customers, but not as extremely as false positives.
+
+## Internet service patterns
+
+| Error type | Fiber optic | DSL | No internet service |
+|---|---:|---:|---:|
+| Correct | 39.81% | 35.37% | 24.82% |
+| False negative | 51.27% | 36.54% | 12.18% |
+| False positive | 81.25% | 18.75% | 0.00% |
+
+False positives were heavily concentrated among Fiber optic customers.
+
+This suggests that Fiber optic service is another strong churn-risk signal for the model. Many false positives looked risky because they had Fiber optic service, but they did not actually churn.
+
+False negatives also had a higher Fiber optic share than the correctly classified group, but again the pattern was less extreme than for false positives.
+
+## Payment method patterns
+
+| Error type | Electronic check | Mailed check | Credit card automatic | Bank transfer automatic |
+|---|---:|---:|---:|---:|
+| Correct | 29.42% | 23.88% | 22.84% | 23.86% |
+| False negative | 37.82% | 22.10% | 20.26% | 19.83% |
+| False positive | 74.74% | 11.72% | 8.33% | 5.21% |
+
+False positives were strongly concentrated among customers using Electronic check.
+
+This suggests that Electronic check is another important churn-risk signal. The model often flagged Electronic check customers as likely churners, but many of those customers still stayed.
+
+False negatives also had a higher Electronic check share than the correctly classified group, but the pattern was much less extreme than for false positives.
+
+## Error analysis conclusion
+
+The error analysis shows that the model's mistakes are not random.
+
+False positives tend to look like very high-risk customers:
+
+- very short tenure;
+- high monthly charges;
+- month-to-month contracts;
+- Fiber optic internet service;
+- Electronic check payment method.
+
+These customers have many features commonly associated with churn, so the model flags them. Some of them still stay, which creates false positives.
+
+False negatives are actual churners that the model missed. They also show some churn-risk signals, especially month-to-month contracts, Fiber optic service, and Electronic check payment, but their profile is generally less extreme than the false positives.
+
+This suggests that the default `0.50` threshold may be too strict if the business wants to catch more churners. A lower threshold may reduce false negatives, but it would likely increase false positives.
+
+The final decision threshold should therefore be selected later using a business-cost-aware approach, rather than assuming that `0.50` is the best threshold.
