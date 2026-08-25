@@ -148,3 +148,54 @@ if churn_probability >= 0.10:
 This threshold is not universally optimal. It is optimal only for the simplified cost assumptions used in this project.
 
 If the retention offer cost increased, or if the value of retaining a churner decreased, the best threshold could move higher.
+
+## Final held-out test evaluation
+
+After selecting the model and threshold using out-of-fold training probabilities, the final Gradient Boosting pipeline was trained on the training split and evaluated once on the held-out test set.
+
+The selected decision policy was not changed after this evaluation:
+
+```text
+Selected model: Gradient Boosting
+Selected threshold: 0.10
+```
+
+Final held-out test results:
+
+| Metric | Value |
+|---|---:|
+| TN | 492 |
+| FP | 543 |
+| FN | 17 |
+| TP | 357 |
+| Accuracy | 0.6026 |
+| Precision | 0.3967 |
+| Recall | 0.9545 |
+| F1 | 0.5604 |
+| ROC-AUC | 0.8467 |
+| Average Precision | 0.6684 |
+| Brier score | 0.1349 |
+| Net value | €50,340 |
+
+## Final test interpretation
+
+The selected threshold gives very high churn recall on the held-out test set:
+
+```text
+Recall = 0.9545
+FN = 17
+TP = 357
+```
+
+This means the model catches most customers who actually churn.
+
+The trade-off is a large number of false positives:
+
+```text
+FP = 543
+Precision = 0.3967
+```
+
+So many contacted customers would not have churned. This is expected because the selected threshold is low and the cost model treats missed churners as much more expensive than unnecessary retention contacts.
+
+This final test result was used only for reporting. The threshold was not retuned after seeing the held-out test performance.
