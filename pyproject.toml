@@ -14,6 +14,8 @@ dependencies = [
     "matplotlib",
     "joblib",
     "PyYAML",
+    "fastapi",
+    "uvicorn",
 ]
 
 [project.optional-dependencies]
