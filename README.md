@@ -6,7 +6,7 @@ This project implements a customer churn classification workflow using a public 
 
 ## Project Status
 
-Steps 1-15 are complete:
+Steps 1-17 are complete:
 
 - problem definition;
 - dataset selection;
@@ -24,9 +24,11 @@ Steps 1-15 are complete:
 - business-cost-aware threshold selection;
 - configuration-driven final model training and saved metadata;
 - batch prediction CLI;
-- churn prediction API endpoint.
+- churn prediction API endpoint;
+- engineering quality, tests, logging, and model card;
+- final verification and portfolio review.
 
-Current step: Step 16, engineering quality and documentation.
+Project status: complete.
 
 ## Dataset
 
