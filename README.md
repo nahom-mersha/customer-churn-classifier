@@ -2,11 +2,11 @@
 
 A machine-learning project that predicts whether a customer is likely to leave a service.
 
-This project implements a customer churn classification workflow using a public telecom dataset. It includes from-scratch logistic regression with NumPy, professional scikit-learn model comparisons, probability-focused evaluation, business-cost-aware threshold selection, and a reproducible final model training workflow.
+This project implements a customer churn classification workflow using a public telecom dataset. It includes from-scratch logistic regression with NumPy, professional scikit-learn model comparisons, probability-focused evaluation, business-cost-aware threshold selection, a reproducible final model training workflow, batch prediction, and an API endpoint.
 
 ## Project Status
 
-Steps 1-14 are complete:
+Steps 1-15 are complete:
 
 - problem definition;
 - dataset selection;
@@ -22,9 +22,11 @@ Steps 1-14 are complete:
 - professional model comparison;
 - probability quality, calibration, and error analysis;
 - business-cost-aware threshold selection;
-- configuration-driven final model training and saved metadata.
+- configuration-driven final model training and saved metadata;
+- batch prediction CLI;
+- churn prediction API endpoint.
 
-Current step: Step 15, batch prediction and API endpoint.
+Current step: Step 16, engineering quality and documentation.
 
 ## Dataset
 
@@ -116,6 +118,88 @@ models/customer_churn_gradient_boosting_metadata.json
 
 The `.joblib` model artifact is generated locally and ignored by Git. The metadata JSON is committed as a lightweight record of the selected model, threshold, metrics, feature list, and artifact paths.
 
+## Batch Prediction
+
+The batch prediction CLI loads the saved model pipeline and metadata, reads a CSV file, validates the required feature columns, and writes churn probabilities and predicted labels to an output CSV.
+
+Example command:
+
+```bash
+python scripts/predict_batch.py --input data/processed/telco_churn_clean.csv --output reports/batch_predictions.csv
+```
+
+The output CSV includes the original input columns plus:
+
+```text
+churn_probability
+predicted_churn
+decision_threshold
+```
+
+The batch prediction script is inference-only. It does not retrain the model.
+
+## API Prediction
+
+The project includes a FastAPI endpoint for single-customer churn prediction.
+
+To run the API locally:
+
+```bash
+uvicorn customer_churn_classifier.api:app --reload
+```
+
+Then open the interactive API documentation at:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Available endpoints:
+
+```text
+GET  /
+GET  /health
+POST /predict
+```
+
+Example `/predict` request body:
+
+```json
+{
+  "SeniorCitizen": 0,
+  "tenure": 1,
+  "MonthlyCharges": 29.85,
+  "TotalCharges": 29.85,
+  "gender": "Female",
+  "Partner": "Yes",
+  "Dependents": "No",
+  "PhoneService": "No",
+  "MultipleLines": "No phone service",
+  "InternetService": "DSL",
+  "OnlineSecurity": "No",
+  "OnlineBackup": "Yes",
+  "DeviceProtection": "No",
+  "TechSupport": "No",
+  "StreamingTV": "No",
+  "StreamingMovies": "No",
+  "Contract": "Month-to-month",
+  "PaperlessBilling": "Yes",
+  "PaymentMethod": "Electronic check"
+}
+```
+
+Example response:
+
+```json
+{
+  "churn_probability": 0.667246860360653,
+  "decision_threshold": 0.1,
+  "predicted_churn": 1
+}
+```
+
+The API is inference-only. It loads the saved model and metadata paths from `configs/final_model.yaml`.
+
 ## Development Tools
 
 - `src` layout
@@ -125,6 +209,8 @@ The `.joblib` model artifact is generated locally and ignored by Git. The metada
 - YAML configuration
 - GitHub Actions
 - Docker
+- FastAPI
+- Uvicorn
 
 ## Limitations
 
