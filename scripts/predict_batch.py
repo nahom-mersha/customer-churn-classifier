@@ -5,9 +5,18 @@ from typing import Any
 
 import joblib
 import pandas as pd
+import yaml
 
-DEFAULT_MODEL_PATH = Path("models/customer_churn_gradient_boosting.joblib")
-DEFAULT_METADATA_PATH = Path("models/customer_churn_gradient_boosting_metadata.json")
+DEFAULT_CONFIG_PATH = Path("configs/final_model.yaml")
+
+
+def load_config(path: Path = DEFAULT_CONFIG_PATH) -> dict[str, Any]:
+    """Load final model configuration."""
+    if not path.exists():
+        raise FileNotFoundError(f"Config file not found: {path}")
+
+    with path.open("r", encoding="utf-8") as file:
+        return yaml.safe_load(file)
 
 
 def load_metadata(path: Path) -> dict[str, Any]:
@@ -49,10 +58,14 @@ def validate_input_columns(
 def predict_batch(
     input_path: Path,
     output_path: Path,
-    model_path: Path = DEFAULT_MODEL_PATH,
-    metadata_path: Path = DEFAULT_METADATA_PATH,
+    config_path: Path = DEFAULT_CONFIG_PATH,
 ) -> None:
     """Load a saved model and create batch churn predictions."""
+    config = load_config(config_path)
+
+    model_path = Path(config["artifacts"]["model_path"])
+    metadata_path = Path(config["artifacts"]["metadata_path"])
+
     metadata = load_metadata(metadata_path)
     model = load_model(model_path)
 
@@ -78,6 +91,8 @@ def predict_batch(
     print("Batch predictions saved.")
     print(f"Input file: {input_path}")
     print(f"Output file: {output_path}")
+    print(f"Model artifact: {model_path}")
+    print(f"Metadata artifact: {metadata_path}")
     print(f"Rows predicted: {len(output_data)}")
     print(f"Decision threshold: {threshold}")
 
@@ -102,17 +117,10 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--model-path",
-        default=DEFAULT_MODEL_PATH,
+        "--config",
+        default=DEFAULT_CONFIG_PATH,
         type=Path,
-        help="Path to saved model artifact.",
-    )
-
-    parser.add_argument(
-        "--metadata-path",
-        default=DEFAULT_METADATA_PATH,
-        type=Path,
-        help="Path to saved model metadata JSON.",
+        help="Path to final model config file.",
     )
 
     return parser.parse_args()
@@ -124,8 +132,7 @@ def main() -> None:
     predict_batch(
         input_path=args.input,
         output_path=args.output,
-        model_path=args.model_path,
-        metadata_path=args.metadata_path,
+        config_path=args.config,
     )
 
 
