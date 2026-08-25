@@ -23,6 +23,7 @@ dev = [
     "pytest",
     "ruff",
     "pre-commit",
+    "httpx",
 ]
 
 [tool.setuptools.packages.find]
