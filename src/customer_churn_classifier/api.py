@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -9,13 +10,14 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, ConfigDict
 
 CONFIG_PATH = Path("configs/final_model.yaml")
+logger = logging.getLogger(__name__)
 
 
 def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
     """Load final model configuration."""
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")
-
+    logger.info("Loading API config from %s", path)
     with path.open("r", encoding="utf-8") as file:
         return yaml.safe_load(file)
 
@@ -26,7 +28,7 @@ def load_metadata(path: Path) -> dict[str, Any]:
         raise FileNotFoundError(
             f"Metadata file not found: {path}. Run scripts/train_final_model.py first."
         )
-
+    logger.info("Loading model metadata from %s", path)
     with path.open("r", encoding="utf-8") as file:
         return json.load(file)
 
@@ -118,7 +120,10 @@ def create_app(
             probability = float(saved_model.predict_proba(input_data)[:, 1][0])
             threshold = float(saved_metadata["threshold"])
             predicted_churn = int(probability >= threshold)
-
+            logger.info(
+                "Generated API churn prediction with threshold %.3f",
+                threshold,
+            )
             return {
                 "churn_probability": probability,
                 "decision_threshold": threshold,
@@ -126,6 +131,7 @@ def create_app(
             }
 
         except Exception as error:
+            logger.exception("API prediction failed")
             raise HTTPException(
                 status_code=400,
                 detail=f"Prediction failed: {error}",

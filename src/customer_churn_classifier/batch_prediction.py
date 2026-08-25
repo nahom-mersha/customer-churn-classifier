@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -7,6 +8,7 @@ import pandas as pd
 import yaml
 
 DEFAULT_CONFIG_PATH = Path("configs/final_model.yaml")
+logger = logging.getLogger(__name__)
 
 
 def load_config(path: Path = DEFAULT_CONFIG_PATH) -> dict[str, Any]:
@@ -49,6 +51,7 @@ def validate_input_columns(
     ]
 
     if missing_columns:
+        logger.error("Input CSV is missing required columns: %s", missing_columns)
         raise ValueError(
             "Input CSV is missing required columns: " + ", ".join(missing_columns)
         )
@@ -60,6 +63,7 @@ def predict_batch(
     config_path: Path = DEFAULT_CONFIG_PATH,
 ) -> None:
     """Load a saved model and create batch churn predictions."""
+    logger.info("Loading batch prediction config from %s", config_path)
     config = load_config(config_path)
 
     model_path = Path(config["artifacts"]["model_path"])
@@ -72,8 +76,9 @@ def predict_batch(
     threshold = metadata["threshold"]
 
     input_data = pd.read_csv(input_path)
+    logger.info("Loaded input CSV from %s with %s rows", input_path, len(input_data))
     validate_input_columns(input_data, required_features)
-
+    logger.info("Input CSV contains all required feature columns")
     features = input_data[required_features]
 
     probabilities = model.predict_proba(features)[:, 1]
@@ -86,7 +91,7 @@ def predict_batch(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_data.to_csv(output_path, index=False)
-
+    logger.info("Saved batch predictions to %s", output_path)
     print("Batch predictions saved.")
     print(f"Input file: {input_path}")
     print(f"Output file: {output_path}")

@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,12 @@ from customer_churn_classifier.models import build_gradient_boosting_pipeline
 from customer_churn_classifier.split import make_train_test_split
 
 CONFIG_PATH = Path("configs/final_model.yaml")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 
 def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
@@ -31,7 +38,7 @@ def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
 
 def main() -> None:
     config = load_config()
-
+    logger.info("Loaded final model training config from %s", CONFIG_PATH)
     threshold = config["model"]["threshold"]
     hyperparameters = config["model"]["hyperparameters"]
 
@@ -50,14 +57,15 @@ def main() -> None:
 
     df = load_clean_data()
     X_train, X_test, y_train, y_test = make_train_test_split(df)
-
+    logger.info("Loaded clean dataset with %s rows", len(df))
+    logger.info("Training samples: %s; test samples: %s", len(X_train), len(X_test))
     model = build_gradient_boosting_pipeline()
     model.set_params(
         classifier__learning_rate=hyperparameters["learning_rate"],
         classifier__max_depth=hyperparameters["max_depth"],
         classifier__n_estimators=hyperparameters["n_estimators"],
     )
-
+    logger.info("Training final %s model", config["model"]["name"])
     model.fit(X_train, y_train)
 
     probabilities = model.predict_proba(X_test)[:, 1]
@@ -106,10 +114,10 @@ def main() -> None:
     }
 
     joblib.dump(model, model_path)
-
+    logger.info("Saved model artifact to %s", model_path)
     with metadata_path.open("w", encoding="utf-8") as file:
         json.dump(metadata, file, indent=2)
-
+    logger.info("Saved metadata artifact to %s", metadata_path)
     print("Final model trained and saved.")
     print(f"Model artifact: {model_path}")
     print(f"Metadata artifact: {metadata_path}")

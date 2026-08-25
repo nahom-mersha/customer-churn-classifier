@@ -1,9 +1,15 @@
 import argparse
+import logging
 from pathlib import Path
 
 from customer_churn_classifier.batch_prediction import (
     DEFAULT_CONFIG_PATH,
     predict_batch,
+)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
 
