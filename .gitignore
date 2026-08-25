@@ -11,3 +11,6 @@ data/processed/*
 # Keep folder structure
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+
+# Generated model artifacts
+models/*.joblib

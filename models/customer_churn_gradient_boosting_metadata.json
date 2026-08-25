@@ -1,0 +1,54 @@
+{
+  "model_name": "gradient_boosting",
+  "created_at_utc": "2026-08-25T10:26:06.961809+00:00",
+  "threshold": 0.1,
+  "hyperparameters": {
+    "learning_rate": 0.1,
+    "max_depth": 1,
+    "n_estimators": 200
+  },
+  "random_seed": 42,
+  "train_samples": 5634,
+  "test_samples": 1409,
+  "features": [
+    "SeniorCitizen",
+    "tenure",
+    "MonthlyCharges",
+    "TotalCharges",
+    "gender",
+    "Partner",
+    "Dependents",
+    "PhoneService",
+    "MultipleLines",
+    "InternetService",
+    "OnlineSecurity",
+    "OnlineBackup",
+    "DeviceProtection",
+    "TechSupport",
+    "StreamingTV",
+    "StreamingMovies",
+    "Contract",
+    "PaperlessBilling",
+    "PaymentMethod"
+  ],
+  "confusion_matrix": {
+    "tn": 492,
+    "fp": 543,
+    "fn": 17,
+    "tp": 357
+  },
+  "metrics": {
+    "accuracy": 0.602555003548616,
+    "precision": 0.39666666666666667,
+    "recall": 0.9545454545454546,
+    "f1": 0.5604395604395604,
+    "roc_auc": 0.8467333178330619,
+    "average_precision": 0.668421605858372,
+    "brier_score": 0.1348909935288527,
+    "net_value": 50340
+  },
+  "artifact_paths": {
+    "model_path": "models\\customer_churn_gradient_boosting.joblib",
+    "metadata_path": "models\\customer_churn_gradient_boosting_metadata.json"
+  }
+}
