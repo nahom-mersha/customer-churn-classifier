@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from scripts.predict_batch import predict_batch
+from customer_churn_classifier.batch_prediction import predict_batch
 
 FEATURES = [
     "SeniorCitizen",
@@ -120,7 +120,7 @@ def test_predict_batch_writes_expected_prediction_columns(tmp_path, monkeypatch)
     )
 
     monkeypatch.setattr(
-        "scripts.predict_batch.load_model",
+        "customer_churn_classifier.batch_prediction.load_model",
         lambda path: FakeModel(),
     )
 
