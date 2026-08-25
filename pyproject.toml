@@ -12,6 +12,8 @@ dependencies = [
     "pandas",
     "scikit-learn",
     "matplotlib",
+    "joblib",
+    "PyYAML",
 ]
 
 [project.optional-dependencies]
