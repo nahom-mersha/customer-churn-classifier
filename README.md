@@ -30,6 +30,12 @@ Steps 1-17 are complete:
 
 Project status: complete.
 
+## AI Notes
+
+My learning notes for this project are available here:
+
+[Project 3 — Customer Churn Classifier AI Notes](https://github.com/nahom-mersha/ai-notes/tree/main/Project%203%20-%20Customer%20Churn%20Classifier)
+
 ## Dataset
 
 This project uses the classic IBM Telco Customer Churn dataset.
