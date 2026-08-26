@@ -1,5 +1,10 @@
 # Customer Churn Classifier Roadmap
 
+**Status: Completed.**
+This document records the project scope,
+implementation plan, and completion criteria. See the README for
+final results and usage instructions.
+
 This project builds a customer churn classification system. Given customer contract, billing, and service information, the system estimates the probability that a customer will churn.
 
 The project starts with problem definition and dataset validation, then moves through preprocessing, baselines, from-scratch logistic regression, professional model comparison, probability evaluation, threshold selection, and deployment-ready inference.
