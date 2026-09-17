@@ -17,6 +17,7 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "snowflake-connector-python",
+    "python-dotenv",
 ]
 
 [project.optional-dependencies]
