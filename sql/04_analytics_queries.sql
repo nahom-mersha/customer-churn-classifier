@@ -57,14 +57,22 @@ SELECT
     tenure_band,
     "InternetService" AS internet_service,
     COUNT(*) AS customers,
+    SUM("Churn") AS churned_customers,
     AVG("Churn") AS churn_rate,
-    SUM("MonthlyCharges") AS monthly_revenue_at_risk
+    SUM(
+        CASE
+            WHEN "Churn" = 1 THEN "MonthlyCharges"
+            ELSE 0
+        END
+    ) AS monthly_charges_from_churned_customers
 FROM ANALYTICS.TELCO_CHURN_CURATED
 GROUP BY
     "Contract",
     tenure_band,
     "InternetService"
-HAVING COUNT(*) >= 25
+HAVING
+    COUNT(*) >= 25
+    AND AVG("Churn") > 0
 ORDER BY
     churn_rate DESC,
-    monthly_revenue_at_risk DESC;
+    monthly_charges_from_churned_customers DESC;
