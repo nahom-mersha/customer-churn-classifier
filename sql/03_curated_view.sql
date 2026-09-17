@@ -28,8 +28,10 @@ WITH typed AS (
         "PaymentMethod",
         "MonthlyCharges",
 
-        TRY_TO_NUMBER(
-            NULLIF(TRIM("TotalCharges"), '')
+        TRY_TO_DECIMAL(
+            NULLIF(TRIM("TotalCharges"), ''),
+            12,
+            2
         )::FLOAT AS "TotalCharges",
 
         CASE "Churn"
