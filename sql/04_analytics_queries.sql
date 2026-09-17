@@ -24,8 +24,7 @@ SELECT
     AVG("Churn") AS churn_rate
 FROM ANALYTICS.TELCO_CHURN_CURATED
 GROUP BY tenure_band
-ORDER BY tenure_band;
-
+ORDER BY MIN("tenure");
 
 -- Window function:
 -- Rank payment methods within each contract by churn rate.
