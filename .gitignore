@@ -17,3 +17,13 @@ models/*.joblib
 
 # Generated reports
 reports/*.csv
+
+# Local credentials
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+*.pem
+
+# Generated cloud-pipeline reports
+reports/cloud_pipeline/

@@ -16,6 +16,7 @@ dependencies = [
     "PyYAML",
     "fastapi",
     "uvicorn",
+    "snowflake-connector-python",
 ]
 
 [project.optional-dependencies]
