@@ -113,6 +113,15 @@ The generated CSV is the input for the Power BI report. The detailed command and
 - Predictions should support human review, not automatically penalize or disadvantage customers.
 - The cloud workflow is a learning-scale portfolio implementation, not a production system with scheduling, monitoring, or live customer-data controls.
 
+## Technical analysis
+
+Detailed model-development notes are organized under [`docs/technical/`](docs/technical/):
+
+- [Evaluation strategy](docs/technical/evaluation_strategy.md)
+- [Model comparison](docs/technical/model_comparison.md)
+- [Probability quality analysis](docs/technical/probability_quality_analysis.md)
+- [Scratch logistic regression evaluation](docs/technical/scratch_logistic_evaluation.md)
+
 ## Learning notes
 
 [Project 3 — Customer Churn Classifier AI Notes](https://github.com/nahom-mersha/ai-notes/tree/main/Project%203%20-%20Customer%20Churn%20Classifier)
