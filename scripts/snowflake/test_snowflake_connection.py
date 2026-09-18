@@ -1,7 +1,27 @@
 import os
 
+import pytest
 import snowflake.connector
 from dotenv import load_dotenv
+
+required_variables = [
+    "SNOWFLAKE_ACCOUNT",
+    "SNOWFLAKE_USER",
+    "SNOWFLAKE_PASSWORD",
+    "SNOWFLAKE_WAREHOUSE",
+    "SNOWFLAKE_DATABASE",
+    "SNOWFLAKE_SCHEMA",
+]
+
+missing_variables = [
+    variable for variable in required_variables if not os.getenv(variable)
+]
+
+if missing_variables:
+    pytest.skip(
+        "Snowflake credentials are not configured; skipping integration test.",
+        allow_module_level=True,
+    )
 
 load_dotenv()
 
