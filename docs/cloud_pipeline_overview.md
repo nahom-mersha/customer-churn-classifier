@@ -6,7 +6,6 @@ This extension shows how a trained churn model can be used inside a small analyt
 
 ## What happens
 
-```text
 1. The public IBM Telco dataset is loaded into Snowflake.
 2. SQL keeps a raw layer and creates a curated, analysis-ready view.
 3. Python checks the curated data and compares it with the existing cleaning path.
@@ -14,7 +13,6 @@ This extension shows how a trained churn model can be used inside a small analyt
 5. A CSV report stores probabilities, labels, threshold, and historical outcome.
 6. Power BI displays the main churn patterns and risk distribution.
 7. OneDrive and Power Automate send a generic Gmail notification when the report changes.
-```
 
 ## What this does not do
 
@@ -36,6 +34,18 @@ The cloud scoring script creates `reports/cloud_predictions.csv` with fields inc
 | `actual_churn` | Historical outcome included for evaluation in this dataset. |
 
 The Power BI report is a decision-support view of this generated file. Its results describe patterns in the dataset; they are not causal conclusions.
+
+## Evidence from the Snowflake workflow
+
+The following screenshots document the Snowflake objects and analytical query results used in the workflow. They contain no passwords or private customer data.
+
+![Snowflake objects used by the pipeline](images/snowflake-objects.png)
+
+*Snowflake database browser showing the project database, schemas, table, view, and stage objects.*
+
+![Snowflake advanced analytics query results](images/snowflake-advanced-analytics.png)
+
+*Snowflake analytical query showing churn patterns across customer segments.*
 
 ## Security and cost boundaries
 
