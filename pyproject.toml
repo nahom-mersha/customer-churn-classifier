@@ -10,12 +10,14 @@ requires-python = ">=3.10"
 dependencies = [
     "numpy",
     "pandas",
-    "scikit-learn",
+    "scikit-learn==1.9.0",
     "matplotlib",
     "joblib",
     "PyYAML",
     "fastapi",
     "uvicorn",
+    "snowflake-connector-python",
+    "python-dotenv",
 ]
 
 [project.optional-dependencies]
