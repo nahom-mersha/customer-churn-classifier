@@ -1,227 +1,120 @@
 # Customer Churn Classifier
 
-A machine-learning project that predicts whether a customer is likely to leave a service.
+An end-to-end learning project that estimates which telecom customers may be at risk of leaving and presents the results in a simple analytics workflow.
 
-This project implements a customer churn classification workflow using a public telecom dataset. It includes from-scratch logistic regression with NumPy, professional scikit-learn model comparisons, probability-focused evaluation, business-cost-aware threshold selection, a reproducible final model training workflow, batch prediction, and an API endpoint.
+The project uses the public IBM Telco Customer Churn dataset. It combines data validation, machine learning, batch and API prediction, Snowflake analytics, Power BI reporting, and a small email notification flow.
 
-## Project Status
+## What the project is for
 
-Steps 1-17 are complete:
+The system helps a retention team identify groups of customers that may deserve human review. It produces risk estimates; it does not prove that a customer will leave and it should not make automatic decisions about people.
 
-- problem definition;
-- dataset selection;
-- reproducible project and data structure;
-- data cleaning and validation;
-- data-quality reporting;
-- leakage-safe preprocessing;
-- majority-class baseline evaluation;
-- from-scratch logistic regression with NumPy;
-- numerical gradient checking;
-- from-scratch model threshold evaluation;
-- reusable scikit-learn pipelines;
-- professional model comparison;
-- probability quality, calibration, and error analysis;
+## How the complete workflow fits together
+
+```text
+Public telecom data
+        ↓
+Snowflake raw table and curated SQL view
+        ↓
+Python validation and existing saved model
+        ↓
+cloud_predictions.csv
+        ↓
+Power BI dashboard
+        ↓
+OneDrive update → Power Automate → Gmail notification
+```
+
+The cloud step performs inference only. It applies the already-trained model to curated Snowflake data; it does not retrain the model.
+
+## Main results
+
+The selected model is Gradient Boosting. On the held-out test set:
+
+| Metric | Result | Plain meaning |
+|---|---:|---|
+| ROC-AUC | 0.8467 | The model ranks higher-risk customers above lower-risk customers reasonably well. |
+| Recall | 0.9545 | The selected threshold found most churners in the test data. |
+| Precision | 0.3967 | Many flagged customers would not have churned, so human review remains necessary. |
+| Decision threshold | 0.10 | The policy favors finding more possible churners over reducing follow-up volume. |
+
+These results come from a fictional learning dataset and are not evidence of performance for a real company.
+
+## What is included
+
+- leakage-safe cleaning and preprocessing;
+- logistic regression implemented from scratch with NumPy;
+- scikit-learn model comparison and probability evaluation;
 - business-cost-aware threshold selection;
-- configuration-driven final model training and saved metadata;
-- batch prediction CLI;
-- churn prediction API endpoint;
-- engineering quality, tests, logging, and model card;
-- final verification and portfolio review.
+- saved model metadata, batch prediction, and FastAPI inference;
+- Snowflake raw and curated data layers with version-controlled SQL;
+- Python validation and cloud-to-model scoring;
+- Power BI dashboard: [`reports/customer_churn_dashboard.pbix`](reports/customer_churn_dashboard.pbix);
+- OneDrive and Power Automate notification prototype using Gmail.
 
-Project status: complete.
+## Run the core project locally
 
-## AI Notes
-
-My learning notes for this project are available here:
-
-[Project 3 — Customer Churn Classifier AI Notes](https://github.com/nahom-mersha/ai-notes/tree/main/Project%203%20-%20Customer%20Churn%20Classifier)
-
-## Dataset
-
-This project uses the classic IBM Telco Customer Churn dataset.
-
-The raw dataset is not committed to the repository. Download it from Kaggle and place it at:
+Place the public dataset at:
 
 ```text
 data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
 ```
 
-Dataset details and cleaning decisions are documented in:
-
-```text
-data/dataset.md
-```
-
-The full project roadmap is documented in:
-
-```text
-docs/roadmap.md
-```
-
-## Preprocessing
-
-Preprocessing is fitted only on the training set. The test set is transformed using the fitted training preprocessor, so imputation values, scaling values, and one-hot encoded categories are not learned from the test data.
-
-The preprocessing pipeline:
-
-- imputes missing numeric values with the training-set median;
-- scales numeric features;
-- fills missing categorical values with `missing`;
-- one-hot encodes categorical features;
-- ignores unknown categories during future transforms.
-
-The saved final model keeps preprocessing and the classifier together in one scikit-learn pipeline, so future batch or API predictions use the same transformations as training.
-
-## Final Model
-
-The selected final model is Gradient Boosting.
-
-The selected business-cost-aware decision threshold is:
-
-```text
-0.10
-```
-
-This threshold was selected using out-of-fold training probabilities and an illustrative business cost model. It is intentionally lower than the default `0.50` threshold because the project assumes that missing a real churner is more expensive than contacting a customer who would not have churned.
-
-The final held-out test results for the selected model and threshold are:
-
-| Metric | Value |
-|---|---:|
-| Accuracy | 0.6026 |
-| Precision | 0.3967 |
-| Recall | 0.9545 |
-| F1 | 0.5604 |
-| ROC-AUC | 0.8467 |
-| Average Precision | 0.6684 |
-| Brier score | 0.1349 |
-| Net value | €50,340 |
-
-The final threshold decision is documented in:
-
-```text
-docs/business_threshold_selection.md
-```
-
-## Final Model Training
-
-The final model training configuration is stored in:
-
-```text
-configs/final_model.yaml
-```
-
-To train the final preprocessing-and-model pipeline and generate saved artifacts, run:
+Then install and run the main workflow:
 
 ```bash
+python -m venv .venv
+python -m pip install -e ".[dev]"
+python scripts/build_dataset.py
 python scripts/train_final_model.py
+python scripts/predict_batch.py \
+  --input data/processed/telco_churn_clean.csv \
+  --output reports/batch_predictions.csv
 ```
 
-This command creates:
-
-```text
-models/customer_churn_gradient_boosting.joblib
-models/customer_churn_gradient_boosting_metadata.json
-```
-
-The `.joblib` model artifact is generated locally and ignored by Git. The metadata JSON is committed as a lightweight record of the selected model, threshold, metrics, feature list, and artifact paths.
-
-## Batch Prediction
-
-The batch prediction CLI loads the saved model pipeline and metadata, reads a CSV file, validates the required feature columns, and writes churn probabilities and predicted labels to an output CSV.
-
-Example command:
-
-```bash
-python scripts/predict_batch.py --input data/processed/telco_churn_clean.csv --output reports/batch_predictions.csv
-```
-
-The output CSV includes the original input columns plus:
-
-```text
-churn_probability
-predicted_churn
-decision_threshold
-```
-
-The batch prediction script is inference-only. It does not retrain the model.
-
-## API Prediction
-
-The project includes a FastAPI endpoint for single-customer churn prediction.
-
-To run the API locally:
+Run the API with:
 
 ```bash
 uvicorn customer_churn_classifier.api:app --reload
 ```
 
-Then open the interactive API documentation at:
+Quality checks:
 
-```text
-http://127.0.0.1:8000/docs
+```bash
+ruff check .
+pytest
 ```
 
-Available endpoints:
+## Run the cloud extension
 
-```text
-GET  /
-GET  /health
-POST /predict
+Create a local `.env` from [`.env.example`](.env.example) and fill in the Snowflake connection values. Never commit the real `.env` file or credentials.
+
+The SQL setup files are in [`sql/`](sql/). After Snowflake is prepared, the main cloud scoring command is:
+
+```bash
+python scripts/snowflake/run_cloud_pipeline.py \
+  --output reports/cloud_predictions.csv
 ```
 
-Example `/predict` request body:
+The generated CSV is the input for the Power BI report. The detailed command and validation steps are in [`docs/snowflake_cli_guide.md`](docs/snowflake_cli_guide.md).
 
-```json
-{
-  "SeniorCitizen": 0,
-  "tenure": 1,
-  "MonthlyCharges": 29.85,
-  "TotalCharges": 29.85,
-  "gender": "Female",
-  "Partner": "Yes",
-  "Dependents": "No",
-  "PhoneService": "No",
-  "MultipleLines": "No phone service",
-  "InternetService": "DSL",
-  "OnlineSecurity": "No",
-  "OnlineBackup": "Yes",
-  "DeviceProtection": "No",
-  "TechSupport": "No",
-  "StreamingTV": "No",
-  "StreamingMovies": "No",
-  "Contract": "Month-to-month",
-  "PaperlessBilling": "Yes",
-  "PaymentMethod": "Electronic check"
-}
-```
+## Documentation
 
-Example response:
+- [Cloud pipeline overview](docs/cloud_pipeline_overview.md) — plain-language architecture and boundaries.
+- [Snowflake CLI guide](docs/snowflake_cli_guide.md) — setup, commands, and checks.
+- [Power Automate flow](docs/power_automate_flow.md) — OneDrive trigger, Gmail action, and limitation.
+- [Core project roadmap](docs/roadmap.md) — original machine-learning scope and completion criteria.
 
-```json
-{
-  "churn_probability": 0.667246860360653,
-  "decision_threshold": 0.1,
-  "predicted_churn": 1
-}
-```
+## Limitations and responsible use
 
-The API is inference-only. It loads the saved model and metadata paths from `configs/final_model.yaml`.
+- The dataset is public and fictional.
+- The business costs used for threshold selection are illustrative assumptions.
+- A prediction is a risk estimate, not a guarantee.
+- The model must be revalidated on current company data before real use.
+- Predictions should support human review, not automatically penalize or disadvantage customers.
+- The cloud workflow is a learning-scale portfolio implementation, not a production system with scheduling, monitoring, or live customer-data controls.
 
-## Development Tools
+## Learning notes
 
-- `src` layout
-- `pytest`
-- Ruff
-- Logging
-- YAML configuration
-- GitHub Actions
-- Docker
-- FastAPI
-- Uvicorn
+[Project 3 — Customer Churn Classifier AI Notes](https://github.com/nahom-mersha/ai-notes/tree/main/Project%203%20-%20Customer%20Churn%20Classifier)
 
-## Limitations
-
-This is a learning project using a public churn dataset. The selected threshold and business-cost assumptions are illustrative and should not be treated as universal business rules.
-
-Predictions are intended for decision support, not automatic customer treatment.
+This is an AI-assisted learning project. I used ChatGPT to help generate and explain code, then reviewed the implementation, ran tests, explored the underlying concepts, and documented what I learned.
